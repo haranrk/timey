@@ -2,7 +2,7 @@
 A timer for the terminal made using python. I use this to track how much time I spend on varius tasks. 
 
 ## Usage 
-```bash
+```
 python timer.py [command] [tag]
 ```
 `command` can be any of the following:
@@ -21,13 +21,13 @@ For convenience add this file to the path and create an alias to run it.
 
 ### Example usage
 Assuming timer is an alias that invokes `timer.py`
-```bash
+```
 $ timer start algo-hw
 Started timekeeping for algo-hw
 Curent time is 21:21
 ```
 Two hours later
-```bash
+```
 $ timer tick algo-hw
 2h 0m 00s
 
