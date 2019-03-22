@@ -1,9 +1,18 @@
-# Timekeeper
-A timer for the terminal made using python. I use this to track how much time I spend on varius tasks. 
+# Timey
+Timey is a simple cli timer that helps you keeep track of your life. It's written in python.
+
+## Requirements
+`Python` >= 3.6
+
+## Installation
+The package is uploaded on PyPi. Therefore, it can be installed with the following command
+```bash
+pip install timey
+```
 
 ## Usage 
 ```
-python timer.py [command] [tag]
+timey [command] [tag]
 ```
 `command` can be any of the following:
 1. `start` - Starts a new timer for `tag`.
@@ -16,29 +25,25 @@ python timer.py [command] [tag]
 `tag` can be any string.
 
 The logs are stored on a day-by-day-basis.
-
-For convenience add this file to the path and create an alias to run it.
-
-### Example usage
-Assuming timer is an alias that invokes `timer.py`
+The following is a sample usage of the app
 ```
-$ timer start algo-hw
+$ timey start algo-hw
 Started timekeeping for algo-hw
 Curent time is 21:21
 ```
 Two hours later
 ```
-$ timer tick algo-hw
+$ timey tick algo-hw
 2h 0m 00s
 
-$ timer stop algo-hw
+$ timey stop algo-hw
 algo-hw stopped. Last run ran for 2h 0m 00s
 
-$ timer start gaming
+$ timey start gaming
 Started timekeeping for gaming
 Curent time is 21:21
 
-$ timer summarise
+$ timey summarise
 Summary for algo-hw
 1. 21:21 2h 0m 00s
 Total time spent - 2h 0m 00s
