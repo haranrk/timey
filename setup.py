@@ -14,10 +14,9 @@ setuptools.setup(
     url="https://github.com/haranrk/",
     long_description=long_description,
     packages=setuptools.find_packages(),
-    # py_modules='timer.py',
-    # install_requires=[
-    #     'Click'
-    # ],
+    install_requires=[
+        'click'
+    ],
     entry_points='''
         [console_scripts]
         timey=timey.timey:main
