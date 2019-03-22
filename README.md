@@ -1,3 +1,4 @@
+[![PyPI version](https://badge.fury.io/py/timey.svg)](https://badge.fury.io/py/timey)
 # Timey
 Timey is a simple cli timer that helps you keeep track of your life. It's written in python.
 
