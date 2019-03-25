@@ -3,15 +3,13 @@ import os,sys, pickle
 from datetime import datetime, timedelta
 import logging
 from enum import Enum
-# logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 class status(Enum):
     STARTED = '1'
     STOPPED = '2'
-    PAUSED = '3'
 
 def load_timekeeper():
-    # import pdb; pdb.set_trace()
     if os.path.isfile(file_path()):
         logging.debug("File exists")
         with open(file_path(), 'rb') as file:
@@ -34,10 +32,8 @@ def file_path():
 @click.pass_context
 def main(ctx):
     logging.debug('In main')
-    # global timekeeper 
     timekeeper = load_timekeeper()
-    ctx.obj = timekeeper
-    # save_timekeeper(timekeeper)    
+    ctx.obj = timekeeper    
 
 @main.command()
 @click.argument('tag', type=str)
@@ -49,15 +45,23 @@ def start(timekeeper, tag):
         tag {string} -- tag for the timer to be referenced with
     """
     logging.debug("In start")
+    timekeeper = _start(timekeeper, tag)
+    save_timekeeper(timekeeper)
+
+def _start(timekeeper, tag):
     if tag in timekeeper.keys():
-        print(f"Timer data for this tag already exists. Use 'timer resume {tag}' to resume timekeeping.")
+        if timekeeper[tag][0] == status.STARTED:
+            print(f"Timer for {tag} has been running since {format_time(timekeeper[tag][1][-1])}")
+        else:
+            print(f"Resumed timekeeping for {tag}. Last run ran for {last2runs(timekeeper,tag)} ")
+            timekeeper[tag][1].append(datetime.today())
+            timekeeper[tag][0] = status.STARTED
+            return timekeeper
     else:
         timekeeper[tag] = [status.STARTED, [datetime.today()]]
-        print(f"Started timekeeping for {tag}")
+        print(f"Started timekeeping for new tag: {tag}")
         print(f"Curent time is {timekeeper[tag][1][-1].strftime('%H:%M')}")
-        save_timekeeper(timekeeper)
-    # return timekeeper
-    # import pdb; pdb.set_trace()
+        return timekeeper
 
 @main.command()
 @click.argument('tag', type=str)
@@ -88,10 +92,10 @@ def stop(timekeeper, tag):
     if tag == '':
         for _tag in timekeeper.keys():
             if timekeeper[_tag][0] != status.STOPPED:
-                _stop(timekeeper, _tag)
+                timekeeper = _stop(timekeeper, _tag)
     else:
         timekeeper = _stop(timekeeper, tag)
-        save_timekeeper(timekeeper)
+    save_timekeeper(timekeeper)
 
 def _stop(timekeeper, tag):
     if timekeeper[tag][0] == status.STOPPED:
@@ -105,23 +109,19 @@ def _stop(timekeeper, tag):
 @main.command()
 @click.argument('tag', type=str)
 @click.pass_obj
-def resume(timekeeper, tag):
-    '''Resumes timer for tag
+def switch(timekeeper, tag):
+    '''Stops timer for currently running tags and starts a new session for tag 
     
     Arguments:
-        tag {string} -- tag to resume timer for
+        tag {string} -- tag to switch timer to
     '''
-
-    if timekeeper[tag][0] == status.STARTED:
-        print(f"Timer for {tag} has been running since {format_time(timekeeper[tag][1][-1])}")
-    else:
-        print(f"Resumed timekeeping for {tag}. Last run ran for {last2runs(timekeeper,tag)} ")
-        timekeeper[tag][1].append(datetime.today())
-        timekeeper[tag][0] = status.STARTED
-        save_timekeeper(timekeeper)
+    for _tag in timekeeper.keys():
+        if timekeeper[_tag][0] != status.STOPPED:
+            timekeeper = _stop(timekeeper, _tag)
+    timekeeper = _start(timekeeper,tag)
+    save_timekeeper(timekeeper)
 
 def save_timekeeper(timekeeper, test=False):
-    # import pdb; pdb.set_trace()
     with open(file_path(), 'wb') as file:
         pickle.dump(timekeeper,file)
     logging.debug("File saved")
@@ -161,6 +161,7 @@ def _summarise(timekeeper, tag):
         delta = timelist[2*i+1]-timelist[2*i]
         print(f"{i+1}. {format_time(timelist[2*i])} {format_delta(delta)}")
         total_time += delta
+
     if timekeeper[tag][0] == status.STARTED:
         delta = datetime.today()-timelist[-1]
         total_time += delta
