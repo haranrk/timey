@@ -124,7 +124,7 @@ def format_time(time):
 
 def format_delta(delta):
     seconds = delta.total_seconds()
-    return f"{int(seconds//3600)}h {int(seconds//60)}m {int(seconds%60)}s"
+    return f"{int(seconds//3600)}h {int(secondst%3600//60)}m {int(seconds%60)}s"
 
 def _summarise(timekeeper, tag):
     print(f"Summary for {tag}")
