@@ -3,7 +3,7 @@ import os,sys, pickle
 from datetime import datetime, timedelta
 import logging
 from enum import Enum
-#logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 class status(Enum):
     STARTED = '1'
@@ -53,14 +53,14 @@ def _start(timekeeper, tag):
         if timekeeper[tag][0] == status.STARTED:
             print(f"Timer for {tag} has been running since {format_time(timekeeper[tag][1][-1])}")
         else:
-            print(f"Resumed timekeeping for {tag}. Last run ran for {last2runs(timekeeper,tag)} ")
+            print(f"New session for {tag}.\nLast run ran for {last2runs(timekeeper,tag)}.\nCurent time is {timekeeper[tag][1][-1].strftime('%H:%M')}.")
             timekeeper[tag][1].append(datetime.today())
             timekeeper[tag][0] = status.STARTED
             return timekeeper
     else:
         timekeeper[tag] = [status.STARTED, [datetime.today()]]
-        print(f"Started timekeeping for new tag: {tag}")
-        print(f"Curent time is {timekeeper[tag][1][-1].strftime('%H:%M')}")
+        print(f"New session for new tag: {tag}.")
+        print(f"Curent time is {timekeeper[tag][1][-1].strftime('%H:%M')}.")
         return timekeeper
 
 @main.command()
@@ -77,7 +77,7 @@ def tick(timekeeper, tag):
         print(f"Timer for {tag} is not running. Last run ran for {last2runs(timekeeper,tag)}.")
     elif timekeeper[tag][0] == status.STARTED:
         delta = datetime.today() - timekeeper[tag][1][-1]
-        print(format_delta(delta))
+        print(f"{format_delta(delta)} elapsed.\nStarted at {format_time(timekeeper[tag][1][-1])}.")
 
 @main.command()
 @click.argument('tag', type=str, default='')
@@ -103,7 +103,7 @@ def _stop(timekeeper, tag):
     else:
         timekeeper[tag][1].append(datetime.today())
         timekeeper[tag][0] = status.STOPPED
-        print(f"{tag} stopped. Last run ran for {last2runs(timekeeper,tag)} ")
+        print(f"Sessiong for {tag} stopped. Last run ran for {last2runs(timekeeper,tag)}.")
         return timekeeper
 
 @main.command()
