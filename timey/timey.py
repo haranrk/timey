@@ -76,21 +76,42 @@ def tick(timekeeper, tag):
         print(format_delta(delta))
 
 @main.command()
-@click.argument('tag', type=str)
+@click.argument('tag', type=str, default='')
 @click.pass_obj
 def stop(timekeeper, tag):
+    '''Stops the timer for a tag if provided or stops all running tags
+    
+    Arguments:
+        tag {string} -- tag to stop
+    '''
+
+    if tag == '':
+        for _tag in timekeeper.keys():
+            if timekeeper[_tag][0] != status.STOPPED:
+                _stop(timekeeper, _tag)
+    else:
+        timekeeper = _stop(timekeeper, tag)
+        save_timekeeper(timekeeper)
+
+def _stop(timekeeper, tag):
     if timekeeper[tag][0] == status.STOPPED:
         print(f"Timer for {tag} was already stopped at {format_time(timekeeper[tag][1][-1])}")
     else:
         timekeeper[tag][1].append(datetime.today())
         timekeeper[tag][0] = status.STOPPED
         print(f"{tag} stopped. Last run ran for {last2runs(timekeeper,tag)} ")
-        save_timekeeper(timekeeper)
+        return timekeeper
 
 @main.command()
 @click.argument('tag', type=str)
 @click.pass_obj
 def resume(timekeeper, tag):
+    '''Resumes timer for tag
+    
+    Arguments:
+        tag {string} -- tag to resume timer for
+    '''
+
     if timekeeper[tag][0] == status.STARTED:
         print(f"Timer for {tag} has been running since {format_time(timekeeper[tag][1][-1])}")
     else:
@@ -109,6 +130,12 @@ def save_timekeeper(timekeeper, test=False):
 @click.argument('tag', type=str, default='')
 @click.pass_obj
 def summarise(timekeeper, tag):
+    '''Summarises session history for tag if provided or for all
+    
+    Arguments:
+        tag {string} -- tag to summarise sessions for
+    '''
+
     if tag == '':
         for _tag in timekeeper.keys():
             _summarise(timekeeper, _tag)
@@ -124,7 +151,7 @@ def format_time(time):
 
 def format_delta(delta):
     seconds = delta.total_seconds()
-    return f"{int(seconds//3600)}h {int(secondst%3600//60)}m {int(seconds%60)}s"
+    return f"{int(seconds//3600)}h {int(seconds%3600//60)}m {int(seconds%60)}s"
 
 def _summarise(timekeeper, tag):
     print(f"Summary for {tag}")
