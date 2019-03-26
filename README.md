@@ -29,24 +29,25 @@ The logs are stored on a day-by-day-basis.
 The following is a sample usage of the app
 ```
 $ timey start algo-hw
-Started timekeeping for algo-hw
-Curent time is 21:21
+New session for new tag: algo-hw.
+Current time is 21:00.
 ```
 Two hours later
 ```
 $ timey tick algo-hw
-2h 0m 00s
+2h 0m 0s elapsed.
+Started at 21:00.
 
 $ timey stop algo-hw
-algo-hw stopped. Last run ran for 2h 0m 00s
+Session for algo-hw stopped. Last run ran for 2h 0m 00s.
 
 $ timey start gaming
-Started timekeeping for gaming
-Curent time is 21:21
+New session for new tag: gaming.
+Current time is 23:00.
 
 $ timey summarise
 Summary for algo-hw
-1. 21:21 2h 0m 00s
+1. 21:00 2h 0m 00s
 Total time spent - 2h 0m 00s
 
 Summary for gaming
