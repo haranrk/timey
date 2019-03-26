@@ -9,6 +9,10 @@ import click
 
 # logging.basicConfig(level=logging.DEBUG)
 
+INDEX_STATUS = 0
+INDEX_TIMELIST = 1
+
+
 class Status(Enum):
     STARTED = '1'
     STOPPED = '2'
@@ -58,17 +62,19 @@ def start(timekeeper, tag):
 
 def _start(timekeeper, tag):
     if tag in timekeeper.keys():
-        if timekeeper[tag][0] == Status.STARTED:
-            print(f"Timer for {tag} has been running since {format_time(timekeeper[tag][1][-1])}")
+        if timekeeper[tag][INDEX_STATUS] == Status.STARTED:
+            print(f"Timer for {tag} has been running since {format_time(timekeeper[tag][INDEX_TIMELIST][-1])}")
         else:
-            print(f"New session for {tag}.\nLast run ran for {last2runs(timekeeper,tag)}.\nCurent time is {timekeeper[tag][1][-1].strftime('%H:%M')}.")
-            timekeeper[tag][1].append(datetime.today())
-            timekeeper[tag][0] = Status.STARTED
+            print(f"New session for {tag}.")
+            print(f"Last run ran for {last2runs(timekeeper,tag)}.")
+            print(f"Curent time is {timekeeper[tag][INDEX_TIMELIST][-1].strftime('%H:%M')}.")
+            timekeeper[tag][INDEX_TIMELIST].append(datetime.today())
+            timekeeper[tag][INDEX_STATUS] = Status.STARTED
             return timekeeper
     else:
         timekeeper[tag] = [Status.STARTED, [datetime.today()]]
         print(f"New session for new tag: {tag}.")
-        print(f"Current time is {timekeeper[tag][1][-1].strftime('%H:%M')}.")
+        print(f"Current time is {timekeeper[tag][INDEX_TIMELIST][-1].strftime('%H:%M')}.")
         return timekeeper
 
 
@@ -82,11 +88,12 @@ def tick(timekeeper, tag):
         tag {string} -- tag for which to get the time for 
     """
     logging.debug("In main")
-    if timekeeper[tag][0] == Status.STOPPED:
+    if timekeeper[tag][INDEX_STATUS] == Status.STOPPED:
         print(f"Timer for {tag} is not running. Last run ran for {last2runs(timekeeper,tag)}.")
-    elif timekeeper[tag][0] == Status.STARTED:
-        delta = datetime.today() - timekeeper[tag][1][-1]
-        print(f"{format_delta(delta)} elapsed.\nStarted at {format_time(timekeeper[tag][1][-1])}.")
+    elif timekeeper[tag][INDEX_STATUS] == Status.STARTED:
+        delta = datetime.today() - timekeeper[tag][INDEX_TIMELIST][-1]
+        print(f"{format_delta(delta)} elapsed.")
+        print(f"Started at {format_time(timekeeper[tag][INDEX_TIMELIST][-1])}.")
 
 
 @main.command()
@@ -101,7 +108,7 @@ def stop(timekeeper, tag):
 
     if tag == '':
         for _tag in timekeeper.keys():
-            if timekeeper[_tag][0] != Status.STOPPED:
+            if timekeeper[_tag][INDEX_STATUS] != Status.STOPPED:
                 timekeeper = _stop(timekeeper, _tag)
     else:
         timekeeper = _stop(timekeeper, tag)
@@ -109,11 +116,11 @@ def stop(timekeeper, tag):
 
 
 def _stop(timekeeper, tag):
-    if timekeeper[tag][0] == Status.STOPPED:
-        print(f"Timer for {tag} was already stopped at {format_time(timekeeper[tag][1][-1])}")
+    if timekeeper[tag][INDEX_STATUS] == Status.STOPPED:
+        print(f"Timer for {tag} was already stopped at {format_time(timekeeper[tag][INDEX_TIMELIST][-1])}")
     else:
-        timekeeper[tag][1].append(datetime.today())
-        timekeeper[tag][0] = Status.STOPPED
+        timekeeper[tag][INDEX_TIMELIST].append(datetime.today())
+        timekeeper[tag][INDEX_STATUS] = Status.STOPPED
         print(f"Session for {tag} stopped. Last run ran for {last2runs(timekeeper,tag)}.")
         return timekeeper
 
@@ -128,7 +135,7 @@ def switch(timekeeper, tag):
         tag {string} -- tag to switch timer to
     """
     for _tag in timekeeper.keys():
-        if timekeeper[_tag][0] != Status.STOPPED:
+        if timekeeper[_tag][INDEX_STATUS] != Status.STOPPED:
             timekeeper = _stop(timekeeper, _tag)
     timekeeper = _start(timekeeper, tag)
     save_timekeeper(timekeeper)
@@ -153,7 +160,7 @@ def summarise(timekeeper, tag):
     if tag == '':
         for _tag in timekeeper.keys():
             _summarise(timekeeper, _tag)
-            print('\n')
+            print()
     else:
         if tag not in timekeeper.keys():
             print(f"{tag} is not defined.")
@@ -162,7 +169,7 @@ def summarise(timekeeper, tag):
 
 
 def last2runs(timekeeper, tag):
-    return format_delta(timekeeper[tag][1][-1] - timekeeper[tag][1][-2])
+    return format_delta(timekeeper[tag][INDEX_TIMELIST][-1] - timekeeper[tag][INDEX_TIMELIST][-2])
 
 
 def format_time(time):
@@ -177,13 +184,13 @@ def format_delta(delta):
 def _summarise(timekeeper, tag):
     print(f"Summary for {tag}")
     total_time = timedelta()
-    timelist = timekeeper[tag][1]
+    timelist = timekeeper[tag][INDEX_TIMELIST]
     for i in range(len(timelist) // 2):
         delta = timelist[2 * i + 1] - timelist[2 * i]
         print(f"{i+1}. {format_time(timelist[2*i])} {format_delta(delta)}")
         total_time += delta
 
-    if timekeeper[tag][0] == Status.STARTED:
+    if timekeeper[tag][INDEX_STATUS] == Status.STARTED:
         delta = datetime.today() - timelist[-1]
         total_time += delta
         print(f"{len(timelist)//2+1}. {format_time(timelist[-1])} {format_delta(delta)} - running")
