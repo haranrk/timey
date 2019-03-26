@@ -155,7 +155,10 @@ def summarise(timekeeper, tag):
             _summarise(timekeeper, _tag)
             print('\n')
     else:
-        _summarise(timekeeper, tag)
+        if tag not in timekeeper.keys():
+            print(f"{tag} is not defined.")
+        else:
+            _summarise(timekeeper, tag)
 
 
 def last2runs(timekeeper, tag):
